@@ -26,11 +26,11 @@ namespace et {
 
 template<class lv, class rv, class system_tag_>
 struct Binary_Expression<lv, rv, oper::ger<system_tag_>>
-    : Expression_Base<Binary_Expression<lv, rv,  oper::ger<system_tag_>>>, BLAS_FUNCTION {
+    : Expression_Base<Binary_Expression<lv, rv,  oper::ger<system_tag_>>>, blas_tag {
 
     using scalar_t  = typename lv::scalar_t;
     using system_tag = system_tag_;
-    using allocator_t = typename allocator::implementation<system_tag>;
+    using allocator_t = typename allocator::implementation<system_tag, scalar_t>;
     using impl_l     = typename blas::implementation<system_tag>;
 
 
@@ -60,6 +60,8 @@ struct Binary_Expression<lv, rv, oper::ger<system_tag_>>
 
     __BCinline__ const auto inner_shape() const { return l_array<DIMS()>([&](int i) { return i == 0 ? left.rows() : i == 1 ? right.rows() : 1; });}
     __BCinline__ const auto block_shape() const { return l_array<DIMS()>([&](int i) { return i == 0 ? left.rows() : i == 1 ? size() : 1; });}
+    __BCinline__ const auto get_shape() const { return make_expr_shape<2>(inner_shape(), block_shape()); }
+
     __BCinline__ int M() const { return left.rows();  }
     __BCinline__ int N() const { return right.rows(); }
 

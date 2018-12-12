@@ -42,9 +42,14 @@ public:
 
     }
 
-    void deallocate() const {}
+    void destroy() const {}
 
 };
+
+template<class T>
+static constexpr bool is_expression() {
+	return std::is_base_of<BC_internal_interface<T>, T>::value;
+}
 }
 }
 

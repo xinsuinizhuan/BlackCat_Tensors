@@ -20,7 +20,7 @@ struct Unary_Expression<functor_type, oper::transpose<system_tag_>>
 
     using scalar_t  = typename functor_type::scalar_t;
     using system_tag = system_tag_;
-    using allocator_t = allocator::implementation<system_tag>;
+    using allocator_t = allocator::implementation<system_tag, scalar_t>;
 
     __BCinline__ static constexpr int DIMS() { return functor_type::DIMS(); }
     __BCinline__ static constexpr int ITERATOR() { return DIMS() > 1? DIMS() :0; }
@@ -46,9 +46,16 @@ struct Unary_Expression<functor_type, oper::transpose<system_tag_>>
             return i == 0 ? array.cols() : 1 == 1 ? array.rows() : array.block_dimension(i);
         });
     }
-    __BCinline__ auto operator [] (int i) const -> decltype(array[0]) {
-        return array[i];
-    }
+
+	__BCinline__
+	const auto get_shape() const {
+		return make_expr_shape<2>(inner_shape(), block_shape());
+	}
+
+	__BCinline__
+	auto operator [] (int i) const -> decltype(array[0]) {
+		return array[i];
+	}
     __BCinline__ int size() const { return array.size(); }
     __BCinline__ int rows() const { return array.cols(); }
     __BCinline__ int cols() const { return array.rows(); }

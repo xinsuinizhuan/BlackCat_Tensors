@@ -16,9 +16,10 @@ namespace et     {
 template<class value, class operation>
 struct Unary_Expression : public Expression_Base<Unary_Expression<value, operation>>, public operation {
 
-    using scalar_t  = decltype(std::declval<operation>()(std::declval<typename value::scalar_t>()));
-    using allocator_t = typename value::allocator_t;
     using system_tag  = typename value::system_tag;
+	using value_type  = decltype(std::declval<operation>()(std::declval<typename value::scalar_t>()));
+    using scalar_t    = typename std::decay_t<value_type>;
+    using allocator_t = typename allocator::implementation<system_tag, scalar_t>;
 
     __BCinline__ static constexpr int DIMS() { return value::DIMS(); }
     __BCinline__ static constexpr int ITERATOR() { return value::ITERATOR(); }
@@ -44,6 +45,8 @@ struct Unary_Expression : public Expression_Base<Unary_Expression<value, operati
     __BCinline__ int cols() const { return array.cols(); }
     __BCinline__ int dimension(int i) const { return array.dimension(i); }
     __BCinline__ int block_dimension(int i) const { return array.block_dimension(i); }
+    __BCinline__ const auto get_shape() const { return array.get_shape(); }
+
 };
 
 template<class op, class expr>

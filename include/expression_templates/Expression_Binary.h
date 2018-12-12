@@ -16,9 +16,10 @@ namespace et     {
 template<class lv, class rv, class operation>
 struct Binary_Expression : public Expression_Base<Binary_Expression<lv, rv, operation>>, public operation {
 
-    using scalar_t = decltype(std::declval<operation>()(std::declval<typename lv::scalar_t&>(), std::declval<typename lv::scalar_t&>()));
-    using allocator_t = typename lv::allocator_t;
     using system_tag  = typename lv::system_tag;
+    using value_type  = decltype(std::declval<operation>()(std::declval<typename lv::scalar_t&>(), std::declval<typename lv::scalar_t&>()));
+    using scalar_t    = typename std::decay_t<value_type>;
+    using allocator_t = typename allocator::implementation<system_tag, scalar_t>;
 
     lv left;
     rv right;
@@ -46,6 +47,7 @@ struct Binary_Expression : public Expression_Base<Binary_Expression<lv, rv, oper
     __BCinline__ int block_dimension(int i) const { return shape().block_dimension(i); }
     __BCinline__ const auto inner_shape() const { return shape().inner_shape(); }
     __BCinline__ const auto block_shape() const { return shape().block_shape(); }
+    __BCinline__ const auto get_shape() const { return shape().get_shape(); }
 };
 
 template<class op, class lv, class rv>

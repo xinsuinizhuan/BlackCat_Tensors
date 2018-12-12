@@ -5,20 +5,20 @@
  *      Author: joseph
  */
 
-#ifndef BC_BLAS_FUNCTION_TESTING_H_
-#define BC_BLAS_FUNCTION_TESTING_H_
+#ifndef BC_blas_tag_TESTING_H_
+#define BC_blas_tag_TESTING_H_
 
 #include "test_common.h"
 
 namespace BC {
 namespace tests {
 
-template<class scalar_t, class alloc_t=BC::Basic_Allocator>
+template<class scalar_t, class alloc_t=BC::Basic_Allocator<scalar_t>>
 int test_operations(int sz=128) {
 
 	using mat = BC::Matrix<scalar_t, alloc_t>;
-	using vec = BC::Vector<scalar_t, alloc_t>;
-	using bmat = BC::Matrix<bool, alloc_t>;
+//	using vec = BC::Vector<scalar_t, alloc_t>;
+	using bmat = BC::Matrix<bool, BC::Basic_Allocator<bool>>;
 
 	int errors = 0;
 
@@ -73,13 +73,13 @@ int test_operations(int sz=128) {
 
 	return errors;
 }
-template<class scalar_t, class alloc_t=BC::Basic_Allocator>
+template<class scalar_t, class alloc_t=BC::Basic_Allocator<scalar_t>>
 int test_matrix_muls(int sz=128) {
 
 	using mat = BC::Matrix<scalar_t, alloc_t>;
-	using vec = BC::Vector<scalar_t, alloc_t>;
+//	using vec = BC::Vector<scalar_t, alloc_t>;
 	using scal = BC::Scalar<scalar_t, alloc_t>;
-	using bmat = BC::Matrix<bool, alloc_t>;
+	using bmat = BC::Matrix<bool, BC::Basic_Allocator<bool>>;
 
 	int errors = 0;
 
@@ -214,4 +214,4 @@ int test_matrix_muls(int sz=128) {
 }
 }
 
-#endif /* BLAS_FUNCTION_TESTING_H_ */
+#endif /* blas_tag_TESTING_H_ */

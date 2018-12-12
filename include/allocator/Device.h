@@ -20,6 +20,7 @@ class device_tag;
 
 namespace allocator {
 
+template<class T>
 struct Device {
 
     using system_tag = device_tag;

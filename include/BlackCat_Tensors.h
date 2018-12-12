@@ -44,7 +44,6 @@ namespace BC {
 }
 #endif
 
-
 #include "Tensor_Base.h"
 #include "Tensor_Aliases.h"
 

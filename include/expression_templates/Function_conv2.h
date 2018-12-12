@@ -19,7 +19,7 @@
 namespace BC {
 namespace et     {
 namespace oper {
-template<int dimension, class ml> class conv : public BLAS_FUNCTION {};
+template<int dimension, class ml> class conv : public blas_tag {};
 }
 
 /*
@@ -31,7 +31,7 @@ template<int dimension, class ml> class conv : public BLAS_FUNCTION {};
 
 template<class lv, class rv, class allocator>
 struct Binary_Expression<lv, rv, oper::conv<2, allocator>>
-: Expression_Base<Binary_Expression<lv, rv,  oper::conv<2, allocator>>>, BLAS_FUNCTION {
+: Expression_Base<Binary_Expression<lv, rv,  oper::conv<2, allocator>>>, blas_tag {
 
     using scalar_type = scalar_of<lv>;
     static constexpr bool transA = blas_feature_detector<lv>::transposed;

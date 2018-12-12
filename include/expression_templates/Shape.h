@@ -26,7 +26,7 @@ struct Shape : Shape_Base<Shape<dims>> {
 
     __BCinline__ Shape() {}
 
-    template<class... integers>
+    template<class... integers, typename=std::enable_if_t<MTF::seq_of<int, integers...>>>
     Shape(integers... ints) {
         static_assert(MTF::seq_of<int, integers...>, "INTEGER LIST OF SHAPE");
         static_assert(sizeof...(integers) == dims, "integer initialization must have the same number of dimensions");
@@ -42,9 +42,9 @@ struct Shape : Shape_Base<Shape<dims>> {
         }
     }
 
-    template<class is_deriv>
-    __BCinline__ Shape(const Inner_Shape<is_deriv> param) {
-        init(param);
+    template<class deriv, typename=std::enable_if_t<is_shape<deriv>()>>
+    __BCinline__ Shape(const deriv param) {
+    	this->copy_shape(param);
     }
     template<int dim, class int_t>
     __BCinline__ Shape (BC::array<dim, int_t> param) {
@@ -131,6 +131,11 @@ struct Shape<1> {
 
     __BCinline__ Shape() {};
     __BCinline__ Shape (BC::array<1, int> param) : m_inner_shape {param}, m_outer_shape { 1 }  {}
+
+    template<class deriv, typename=std::enable_if_t<is_shape<deriv>()>>
+    __BCinline__ Shape(const deriv param) {
+        m_inner_shape[0]= param.rows();
+    }
 
     template<int dim, class f, class int_t> __BCinline__
     Shape (lambda_array<dim, int_t, f> param) {

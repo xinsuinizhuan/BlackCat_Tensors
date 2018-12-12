@@ -68,7 +68,7 @@ public:
 
 
     Tensor_Base(copy_parameter tensor) {
-        this->copy_init(tensor);
+        this->copy_construct(tensor);
     }
 
     Tensor_Base(move_parameter tensor) {
@@ -93,7 +93,7 @@ public:
     }
 
     ~Tensor_Base() {
-        this->deallocate();
+        this->destroy();
     }
 
      const parent& internal() const { return static_cast<const parent&>(*this); }

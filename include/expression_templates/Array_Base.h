@@ -31,8 +31,9 @@ private:
 
 public:
 
-    operator        auto*()       { return as_derived().memptr(); }
+    operator       auto*()       { return as_derived().memptr(); }
     operator const auto*() const { return as_derived().memptr(); }
+    const auto& get_shape() const { return as_derived().as_shape(); }
 
     __BCinline__
     const auto& operator [](int index) const {
@@ -65,7 +66,7 @@ public:
         return as_derived()[this->dims_to_index(index)];
     }
 
-    void deallocate() {}
+    void destroy() {}
     //------------------------------------------Implementation Details---------------------------------------//
 public:
 

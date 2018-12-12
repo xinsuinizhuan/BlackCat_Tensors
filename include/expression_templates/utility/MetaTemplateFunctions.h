@@ -108,20 +108,19 @@ namespace MTF {
     template<bool>
     struct constexpr_if_impl {
         template<class f1>
-        static auto impl(f1 path) {
-            return path();
+        static void impl(f1 path) {
+            path();
         }
     };
     template<>
     struct constexpr_if_impl<false> {
         template<class f1>
-        static auto impl(f1 path) {
-            return path();
+        static void impl(f1 path) {
         }
     };
     template<bool b,class f>
-    auto constexpr_if(f path) {
-        return constexpr_if_impl<b>::impl(path);
+    void constexpr_if(f path) {
+        constexpr_if_impl<b>::impl(path);
     }
 
 

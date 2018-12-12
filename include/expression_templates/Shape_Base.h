@@ -67,7 +67,56 @@ public:
 template<class derived>
 class Shape_Base
         : public Inner_Shape<derived>,
-          public Block_Shape<derived> {};
+          public Block_Shape<derived> {
+
+	static constexpr int dims() {
+		return derived::DIMS();
+	}
+};
+
+
+
+
+template<int n_dims, class InnerShape, class BlockShape>
+struct Expr_Shape : Shape_Base<Expr_Shape<n_dims, InnerShape, BlockShape>> {
+
+	InnerShape m_inner_shape;
+	BlockShape m_block_shape;
+
+	__BCinline__ constexpr int dims() { return n_dims; }
+    __BCinline__ Expr_Shape(InnerShape is_, BlockShape bs_) : m_inner_shape(is_), m_block_shape(bs_) {}
+    __BCinline__ int size() const { return m_inner_shape[0]; }
+    __BCinline__ int rows() const { return m_inner_shape[0]; }
+    __BCinline__ int cols() const { return 1; }
+    __BCinline__ int dimension(int i) const { return i == 0 ? m_inner_shape[0] : 1; }
+    __BCinline__ int outer_dimension() const { return m_inner_shape[0]; }
+    __BCinline__ int block_dimension(int i)   const { return m_block_shape(i); }
+    __BCinline__ const auto& inner_shape() const { return m_inner_shape; }
+    __BCinline__ const auto& block_shape() const { return m_inner_shape; }
+};
+
+template<int dimension, class InnerShape, class BlockShape>
+auto make_expr_shape(InnerShape is_, BlockShape bs_) {
+	return Expr_Shape<dimension, InnerShape, BlockShape>(is_, bs_);
+}
+
+
+template<class T, class enabler=void>
+struct is_most_likely_shape_object : std::false_type {
+	using value = std::false_type;
+};
+
+template<class T>
+struct is_most_likely_shape_object<T, std::enable_if_t<std::is_same<int, decltype(std::declval<T>().dims())>::value>>
+: std::true_type {
+	using value = std::true_type;
+};
+
+
+template<class T>
+static constexpr bool is_shape() {
+	return std::is_base_of<Shape_Base<T>, T>::value;
+}
 
 }
 }

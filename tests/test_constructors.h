@@ -13,7 +13,7 @@
 namespace BC {
 namespace tests {
 
-template<class scalar_t, class alloc_t=BC::Basic_Allocator>
+template<class scalar_t, class alloc_t=BC::Basic_Allocator<scalar_t>>
 int test_constructors(int sz=128) {
 
 

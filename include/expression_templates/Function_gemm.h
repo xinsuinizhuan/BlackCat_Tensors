@@ -18,12 +18,13 @@ namespace et {
 
 template<class lv, class rv, class system_tag_>
 struct Binary_Expression<lv, rv, oper::gemm<system_tag_>>
-: Expression_Base<Binary_Expression<lv, rv,  oper::gemm<system_tag_>>>, BLAS_FUNCTION {
+: Expression_Base<Binary_Expression<lv, rv,  oper::gemm<system_tag_>>>,blas_tag,
+private allocator::implementation<system_tag_, typename lv::scalar_t> {
 
 
     using scalar_t  = typename lv::scalar_t;
-    using allocator_t = typename lv::allocator_t;
     using system_tag = system_tag_;
+    using allocator_t = typename allocator::implementation<system_tag, scalar_t>;
     using impl_l  = typename blas::implementation<system_tag>;
 
 
@@ -61,6 +62,9 @@ struct Binary_Expression<lv, rv, oper::gemm<system_tag_>>
     __BCinline__ int cols() const { return right.cols(); }
     __BCinline__ int dimension(int i) const { return inner_shape()[i]; }
     __BCinline__ int block_dimension(int i) const { return block_shape()[i]; }
+    __BCinline__ const auto get_shape() const { return make_expr_shape<2>(inner_shape(), block_shape()); }
+
+
 
     __BCinline__ int M() const { return left.rows();  }
     __BCinline__ int N() const { return right.cols(); }
@@ -81,8 +85,8 @@ struct Binary_Expression<lv, rv, oper::gemm<system_tag_>>
         auto alpha_rv = blas_feature_detector<rv>::get_scalar(right);
 
         //allocate the alpha and beta scalars,
-        auto alpha = allocator_t::static_allocate((scalar_t)alpha_mod);
-        auto beta = allocator_t::static_allocate((scalar_t)beta_mod);
+        auto alpha = this->static_allocate((scalar_t)alpha_mod);
+        auto beta = this->allocator_t::static_allocate((scalar_t)beta_mod);
 
         //compute the scalar values if need be
         if (lv_scalar)
@@ -95,8 +99,8 @@ struct Binary_Expression<lv, rv, oper::gemm<system_tag_>>
 
 
         //deallocate all the temporaries
-        if (lv_eval) cc(A).deallocate();
-        if (rv_eval) cc(B).deallocate();
+        if (lv_eval) cc(A).destroy();
+        if (rv_eval) cc(B).destroy();
         allocator_t::deallocate(beta);
         allocator_t::deallocate(alpha);
     }

@@ -18,11 +18,15 @@ namespace et {
 
 template<class lv, class rv, class system_tag_>
 struct Binary_Expression<lv, rv, oper::dot<system_tag_>>
-: Expression_Base<Binary_Expression<lv, rv,  oper::dot<system_tag_>>>, BLAS_FUNCTION, Shape<0> {
+: Expression_Base<Binary_Expression<lv, rv,  oper::dot<system_tag_>>>,
+  blas_tag,
+  Shape<0>
+
+{
 
     using scalar_t  = typename lv::scalar_t;
-    using allocator_t = typename lv::allocator_t;
     using system_tag = system_tag_;
+    using allocator_t = typename allocator::implementation<system_tag, scalar_t>;
     using impl_l  = typename blas::implementation<system_tag>;
 
     static constexpr bool transA = blas_feature_detector<lv>::transposed;

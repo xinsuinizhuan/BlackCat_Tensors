@@ -37,7 +37,7 @@ class device_tag;
 
 class BC_Type {}; //a type inherited by expressions and tensor_cores, it is used a flag and lacks a "genuine" implementation
 class BC_Array {};
-class BLAS_FUNCTION {};
+class blas_tag {};
 
 
 template<class internal_t>

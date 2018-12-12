@@ -15,36 +15,38 @@ class host_tag;
 
 namespace allocator {
 
+template<class T>
 struct Host {
 
-    using system_tag = host_tag;
+    using size_type = int;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using is_always_equal = std::true_type;
+    using propagate_on_container_move_assignment = std::true_type;
 
-    template<typename T>
-    static T*& allocate(T*& internal_mem_ptr, int size) {
-        internal_mem_ptr = new T[size];
-        return internal_mem_ptr;
-    }
-    template<class T>
-       static T static_allocate(T value) {
-           return T(value);
-       }
+    //Black Cat-Tags
+    using system_tag = host_tag;								 //host = cpu, device = cuda
+    using propagate_on_expression_construction = std::true_type; //Pass the allocator to temporaries of this class
+    using propagate_on_expression_type_override = Host<T>;		 //You may override this type if you want to pass a different allocator to the expressions
 
-    template<typename T>
-    static T*& unified_allocate(T*& memptr, int size) {
-    	memptr = new T[size];
-        return memptr;
-    }
-    template<typename T>
-    static void deallocate(T* t) {
-        delete[] t;
-    }
-    template<typename T>
-    static void deallocate(T t) {
-        //empty
+
+    T* allocate(int size) const {
+        return new T[size];
     }
 
-	template<class T, class U, class V>
-	static void copy(T* to, U* from, V size) {
+    T static_allocate(T value) const {
+       return T(value);
+    }
+
+    void deallocate(T* ptr) const {
+        delete[] ptr;
+    }
+
+    void deallocate(const T&) const {
+    }
+
+	template<class U, class V>
+	void copy(T* to, U* from, V size) const {
 		__BC_omp_for__
 		for (int i = 0; i < size; ++i) {
 			to[i] = from[i];
@@ -53,16 +55,15 @@ struct Host {
 		__BC_omp_bar__
 	}
 
-    template<class T, class U>
-    static void HostToDevice(T* device_ptr, U* host_ptr, int size=1) {
+    template<class U>
+    void HostToDevice(T* device_ptr, U* host_ptr, int size=1) const {
         copy(device_ptr, host_ptr, size);
     }
-    template<class T, class U>
-    static void DeviceToHost(T* host_ptr, U* device_ptr, int size=1) {
+    template<class U>
+    void DeviceToHost(T* host_ptr, U* device_ptr, int size=1) const {
         copy(host_ptr, device_ptr, size);
     }
-    template<class T>
-    static T extract(T* data_ptr, int index) {
+    T extract(T* data_ptr, int index) const {
     	return data_ptr[index];
     }
 

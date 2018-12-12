@@ -42,7 +42,7 @@ struct Array_View
         std::swap(array, tensor.array);
     }
 
-    void copy_init(const Array_View& view) {
+    void copy_construct(const Array_View& view) {
         this->copy_shape(view);
         this->array = view.array;
     }

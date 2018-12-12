@@ -18,7 +18,7 @@ namespace tree {
 template<class T> struct evaluator<temporary<T>> :evaluator_default<temporary<T>> {
 
     static void deallocate_temporaries(temporary<T> tmp) {
-        tmp.deallocate();
+        tmp.destroy();
     }
 };
 

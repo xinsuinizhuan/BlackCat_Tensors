@@ -19,11 +19,11 @@ namespace et {
 
 template<class lv, class rv, class system_tag_>
 struct Binary_Expression<lv, rv, oper::gemv<system_tag_>>
-: Expression_Base<Binary_Expression<lv, rv,  oper::gemv<system_tag_>>>, BLAS_FUNCTION {
+: Expression_Base<Binary_Expression<lv, rv,  oper::gemv<system_tag_>>>, blas_tag {
 
     using scalar_t    = typename lv::scalar_t;
     using system_tag  = system_tag_;
-    using allocator_t = allocator::implementation<system_tag>;
+    using allocator_t = typename allocator::implementation<system_tag, scalar_t>;
     using impl_l      = blas::implementation<system_tag>;
 
     static constexpr bool transA = blas_feature_detector<lv>::transposed;
@@ -51,6 +51,7 @@ struct Binary_Expression<lv, rv, oper::gemv<system_tag_>>
 
     __BCinline__ const auto inner_shape() const { return l_array<DIMS()>([&](int i) { return i == 0 ? left.rows() : 1; });}
     __BCinline__ const auto block_shape() const { return l_array<DIMS()>([&](int i) { return i == 0 ? rows() : 1; });}
+    __BCinline__ const auto get_shape() const { return make_expr_shape<1>(inner_shape(), block_shape()); }
 
 template<class core, int alpha_mod, int beta_mod>
 void eval(tree::injector<core, alpha_mod, beta_mod> injection_values) const {

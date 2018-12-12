@@ -209,9 +209,10 @@ public:
 template<class internal_t>
 static bool all(const Tensor_Base<internal_t>& tensor) {
 	constexpr int dims = internal_t::DIMS();
-	using allocator_t  = typename allocator::template implementation<typename internal_t::system_tag>;
+	using scalar_t = typename internal_t::scalar_t;
+	using allocator_t  = typename allocator::template implementation<typename internal_t::system_tag, scalar_t>;
 
-	Tensor_Base<BC::et::Array<dims, bool, allocator_t>> bool_tensor(tensor.inner_shape());
+	Tensor_Base<BC::et::Array<dims, bool, allocator_t>> bool_tensor(tensor.get_shape());
 	bool_tensor = logical(tensor);
 
 	return bool_tensor.sum() == bool_tensor.size();
@@ -219,10 +220,11 @@ static bool all(const Tensor_Base<internal_t>& tensor) {
 template<class internal_t>
 static bool any(const Tensor_Base<internal_t>& tensor) {
 	constexpr int dims = internal_t::DIMS();
-	using allocator_t  = typename allocator::template implementation<typename internal_t::system_tag>;
+	using scalar_t = typename internal_t::scalar_t;
+	using allocator_t  = typename allocator::template implementation<typename internal_t::system_tag, scalar_t>;
 
 	Tensor_Base<BC::et::Array<dims, bool, allocator_t>>
-	bool_tensor(tensor.inner_shape());
+	bool_tensor(tensor.get_shape());
 	bool_tensor = logical(tensor);
 
 	return bool_tensor.sum()!= 0;
