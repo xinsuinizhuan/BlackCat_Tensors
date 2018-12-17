@@ -114,7 +114,7 @@ static constexpr int MULTITHREAD_THRESHOLD = 16384;
 
 }
 
-#include "Tensor_Base.h"
-#include "Tensor_Aliases.h"
+#include "Tensors/Tensor_Base.h"
+#include "Tensors/Tensor_Aliases.h"
 
 #endif /* BLACKCAT_TENSORS_H_ */

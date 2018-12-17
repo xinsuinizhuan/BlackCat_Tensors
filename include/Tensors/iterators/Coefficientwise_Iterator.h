@@ -96,7 +96,7 @@ struct Coefficientwise_Iterator {
 
 
     __BCinline__ auto& operator*() const { return this->tensor[this->index]; }
-    __BCinline__ auto& operator*() 	 { return this->tensor[this->index]; }
+    __BCinline__ auto& operator*() 	 	 { return this->tensor[this->index]; }
     
     __BCinline__ auto& operator [] (int i) const { return this->tensor[i]; }
     __BCinline__ auto& operator [] (int i)       { return this->tensor[i]; }
