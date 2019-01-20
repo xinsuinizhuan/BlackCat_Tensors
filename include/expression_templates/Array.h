@@ -198,22 +198,26 @@ public:
         evaluate_to(this->internal(), array_copy.internal(), this->get_allocator_ref());
     }
     void move_construct(Array&& array_move) {
-    	this->array = array_move.array;
-    	this->m_inner_shape = array_move.m_inner_shape;
-    	this->m_block_shape = array_move.m_block_shape;
+    	if (BC::allocator_traits<Allocator>::propagate_on_container_move_assignment::value) {
+    		this->deallocate();
+    		this->get_allocator_ref() =  std::move(array_move.get_allocator_ref());
+    		this->as_shape() = array_move.as_shape();
+    		this->array = array_move.array;
+    		array_move.array = nullptr;
 
-    	array_move.m_inner_shape = {0};
-    	array_move.m_block_shape = {0};
-    	array_move.array = nullptr;
-    }
-    void internal_swap(Array& swap) {
-    	std::swap(this->array, swap.array);
-    	std::swap(this->m_inner_shape, swap.m_inner_shape);
-    	std::swap(this->m_block_shape, swap.m_block_shape);
-
-    	if (BC::allocator_traits<Allocator>::propagate_on_container_swap::value) {
-    		std::swap(this->get_allocator_ref(), swap.get_allocator_ref());
+    	} else if (BC::allocator_traits<Allocator>::is_always_equal::value ||
+    			this->get_allocator_ref() == array_move.get_allocator_ref()) {
+    		this->deallocate();
+			this->as_shape() = array_move.as_shape();
+    		this->array = array_move.array;
+    		array_move.array = nullptr;
+    	} else {
+    		this->copy_construct(array_move);
     	}
+    }
+
+    void internal_move(Array& array_move) {
+    	this->move_construct(std::move(array_move));
     }
 
     void deallocate() {

@@ -64,6 +64,10 @@ struct Array_View : ArrayViewExpr<Dimension, Scalar, Allocator> {
 		this->swap_shape(swap);
 	}
 
+	void internal_move(Array_View& array_mv) {
+		internal_swap(array_mv);
+	}
+
 	template<
 		class tensor_t,
 		typename = std::enable_if_t<

@@ -165,6 +165,16 @@ int test_matrix_muls(int sz=128) {
 		validation = c.approx_equal(d);
 		return BC::all(validation);
 	)
+	BC_TEST_DEF(
+		c = a * b + a + b;
+		d.alias() = a * b + a + b;
+		validation = c.approx_equal(d);
+		return BC::all(validation);
+
+	)
+
+
+
 
 
 //#ifndef BC_DISABLE_TEMPORARIES //This test requires temporaries (Though in the future this should be fixed)

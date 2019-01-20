@@ -90,7 +90,7 @@ public:
     : parent(std::move(tensor.as_parent())) {}
 
     Tensor_Base& operator =(move_assign_parameter tensor) {
-        this->internal_swap(tensor.as_parent());
+        this->internal_move(tensor.as_parent());
         return *this;
     }
 
