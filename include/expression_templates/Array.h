@@ -193,7 +193,7 @@ public:
 	}
 
     void copy_construct(const Array& array_copy) {
-        this->copy_shape(array_copy);
+        this->as_shape() = array_copy.as_shape();
         this->array = this->allocate(this->size());
         evaluate_to(this->internal(), array_copy.internal(), this->get_allocator_ref());
     }

@@ -104,6 +104,7 @@ struct Shape<0> {
 
     template<int x> __BCinline__
     Shape(const Shape<x>&) {} //empty
+    Shape(BC::size_t) {} //empty
 
     __BCinline__ Shape<0>() {}
     __BCinline__ const auto inner_shape() const { return l_array<0>([&](auto x) { return 1; });}
@@ -117,7 +118,8 @@ struct Shape<0> {
     __BCinline__ BC::size_t  leading_dimension(int i) const { return 0; }
     __BCinline__ BC::size_t  block_dimension(int i) const { return 1; }
 
-    template<class deriv> void copy_shape(const Shape_Base<deriv>& shape) {}
+    template<class T>
+    void copy_shape(const Shape_Base<T>& shape) {}
     static void swap_shape(Shape& a) {}
 };
 
