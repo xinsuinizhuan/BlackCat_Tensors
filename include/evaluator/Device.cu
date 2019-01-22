@@ -13,7 +13,6 @@
 #include <cublas_v2.h>
 #include <cuda_runtime_api.h>
 #include <cuda.h>
-
 #include "Device_Impl.cu"
 
 namespace BC {

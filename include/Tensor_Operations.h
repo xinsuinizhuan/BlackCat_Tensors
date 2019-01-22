@@ -352,7 +352,6 @@ public:
 
         template<class derived_t>
         void evaluate(const Tensor_Base<derived_t>& param) {
-        	using allocator_t = typename derived_t::allocator_t;
             evaluate_aliased(param.internal(), tensor.get_allocator_ref());
         }
 

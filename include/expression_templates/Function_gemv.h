@@ -69,8 +69,8 @@ struct Binary_Expression<lv, rv, oper::gemv<System_Tag>>
 		auto& injection = injection_values.data();
 
 		//evaluate the left and right branches (computes only if necessary)
-		auto A = CacheEvaluator<allocator_t>::evaluate(blas_feature_detector<lv>::get_array(left), alloc);
-		auto X = CacheEvaluator<allocator_t>::evaluate(blas_feature_detector<rv>::get_array(right), alloc);
+	    auto A = CacheEvaluator<allocator>::evaluate(blas_feature_detector<lv>::get_array(left), alloc);
+	    auto X = CacheEvaluator<allocator>::evaluate(blas_feature_detector<rv>::get_array(right), alloc);
 
 		//allocate the alpha and beta scalars,
 		auto alpha = utility_l::stack_allocate((value_type)alpha_mod);

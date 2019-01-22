@@ -72,8 +72,8 @@ struct Binary_Expression<lv, rv, oper::ger<System_Tag>>
 		auto& injection = injection_values.data();
 
 		//evaluate the left and right branches (computes only if necessary)
-		auto A = CacheEvaluator<allocator_t>::evaluate(blas_feature_detector<lv>::get_array(left), alloc);
-		auto B = CacheEvaluator<allocator_t>::evaluate(blas_feature_detector<rv>::get_array(right), alloc);
+	    auto A = CacheEvaluator<allocator>::evaluate(blas_feature_detector<lv>::get_array(left), alloc);
+	    auto B = CacheEvaluator<allocator>::evaluate(blas_feature_detector<rv>::get_array(right), alloc);
 
 		//get the left and right side scalar values
 		auto alpha_lv = blas_feature_detector<lv>::get_scalar(left);

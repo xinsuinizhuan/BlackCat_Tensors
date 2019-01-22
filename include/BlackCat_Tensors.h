@@ -40,7 +40,7 @@
 #ifdef BC_INLINE_OVERRIDER
 #define __BCinline__ __BChd__  BC_INLINE_OVERRIDER
 #else
-#define __BCinline__ __BChd__  inline __attribute__((always_inline)) __attribute__((hot))  //host_device inline
+#define __BCinline__ __BChd__ inline __attribute__((always_inline)) __attribute__((hot))  //host_device inline //__forceinline__ is the NVCC macros
 #endif
 
 #define __BChot__   		   inline __attribute__((always_inline)) __attribute__((hot))  //device-only inline
