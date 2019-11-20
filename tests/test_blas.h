@@ -9,7 +9,12 @@
 #define TEST_BLAS_VALIDITY_H_
 
 #include "test_common.h"
+
+#if __has_include(<cblas.h>)
 #include "cblas.h"
+#elif __has_include(<mkl.h>)
+#include <mkl.h>
+#endif
 
 namespace BC {
 namespace tests {
@@ -29,11 +34,13 @@ namespace tests {
 template<class value_type, template<class> class allocator>
 int test_blas(int sz=128) {
 
+	using BC::tensors::all;
+
 	BC_TEST_BODY_HEAD
 
 	using allocator_t = allocator<value_type>;
-	using system_tag = typename BC::allocator_traits<allocator_t>::system_tag;
-	using compare_allocator = BC::allocator::implementation<system_tag, value_type>;
+	using system_tag = typename allocator_traits<allocator_t>::system_tag;
+	using compare_allocator = BC::Allocator<system_tag, value_type>;
 	using blas = BC::blas::implementation<system_tag>;
 
 	using mat = BC::Matrix<value_type, allocator_t>;
@@ -73,12 +80,13 @@ int test_blas(int sz=128) {
 
 		stream.set_blas_pointer_mode_device();
 		blas::gemm(stream, false, false,  sz, sz, sz,
-				one, h_a.data(), sz,
+				one.data(), h_a.data(), sz,
 				h_b.data(), sz,
-				zero, h_y.data(), sz);
+				zero.data(), h_y.data(), sz);
 
-			return BC::all(h_y.approx_equal(y));
+			return BC::tensors::all(h_y.approx_equal(y));
 	)
+
 	BC_TEST_DEF(
 		y[0].zero();
 		h_y[0].zero();
@@ -86,13 +94,14 @@ int test_blas(int sz=128) {
 		y[0] = a * b[0];
 
 		stream.set_blas_pointer_mode_device();
-		blas::gemv(stream, false,  sz, sz,
-				one, h_a.data(), sz,
+		blas::gemv(stream, false, sz, sz,
+				one.data(), h_a.data(), sz,
 				h_b.data(), 1,
-				zero, h_y.data(), 1);
+				zero.data(), h_y.data(), 1);
 
-			return BC::all(h_y[0].approx_equal(y[0]));
+			return BC::tensors::all(h_y[0].approx_equal(y[0]));
 	)
+
 	BC_TEST_DEF(
 		y.zero();
 		h_y.zero();
@@ -100,18 +109,18 @@ int test_blas(int sz=128) {
 
 		stream.set_blas_pointer_mode_device();
 		blas::ger(stream,  sz, sz,
-				one, h_a[0], 1,
-				h_b[0], 1,
+				one.data(), h_a[0].data(), 1,
+				h_b[0].data(), 1,
 				h_y.data(), sz);
 
-			return BC::all(h_y.approx_equal(y));
+			return BC::tensors::all(h_y.approx_equal(y));
 	)
 
 	BC_TEST_DEF(
 			//test dot
 		y[0][0] = a[0] * b[0];
 
-		return BC::all(y[0][0].approx_equal(BC::sum(a[0] % b[0])));
+		return BC::tensors::all(y[0][0].approx_equal(value_sum(a[0] % b[0])));
 	)
 
 	//scalar left test -------------------
@@ -120,12 +129,13 @@ int test_blas(int sz=128) {
 
 		stream.set_blas_pointer_mode_device();
 		blas::gemm(stream, false, false,  sz, sz, sz,
-				two, h_a.data(), sz,
+				two.data(), h_a.data(), sz,
 				h_b.data(), sz,
-				zero, h_y.data(), sz);
+				zero.data(), h_y.data(), sz);
 
-			return BC::all(h_y.approx_equal(y));
+			return BC::tensors::all(h_y.approx_equal(y));
 	)
+
 	BC_TEST_DEF(
 		y[0].zero();
 		h_y[0].zero();
@@ -134,12 +144,13 @@ int test_blas(int sz=128) {
 
 		stream.set_blas_pointer_mode_device();
 		blas::gemv(stream, false,  sz, sz,
-				two, h_a.data(), sz,
+				two.data(), h_a.data(), sz,
 				h_b.data(), 1,
-				zero, h_y.data(), 1);
+				zero.data(), h_y.data(), 1);
 
-			return BC::all(h_y[0].approx_equal(y[0]));
+			return BC::tensors::all(h_y[0].approx_equal(y[0]));
 	)
+
 	BC_TEST_DEF(
 		y.zero();
 		h_y.zero();
@@ -147,85 +158,82 @@ int test_blas(int sz=128) {
 
 		stream.set_blas_pointer_mode_device();
 		blas::ger(stream,  sz, sz,
-				two, h_a[0], 1,
-				h_b[0], 1,
+				two.data(), h_a[0].data(), 1,
+				h_b[0].data(), 1,
 				h_y.data(), sz);
 
-			return BC::all(h_y.approx_equal(y));
+			return BC::tensors::all(h_y.approx_equal(y));
 	)
 
 	BC_TEST_DEF(
 			//test dot
 		y[0][0] = a[0] * b[0];
 
-		return BC::all(y[0][0].approx_equal(BC::sum(a[0] % b[0])));
+		return BC::tensors::all(y[0][0].approx_equal(value_sum(a[0] % b[0])));
 	)
 
-
 	// scalar right test -------------------------------------------
+	BC_TEST_DEF(
+		y =  a * two * b;
+
+		stream.set_blas_pointer_mode_device();
+		blas::gemm(stream, false, false,  sz, sz, sz,
+				two.data(), h_a.data(), sz,
+				h_b.data(), sz,
+				zero.data(), h_y.data(), sz);
+
+		return BC::tensors::all(h_y.approx_equal(y));
+	)
 
 	BC_TEST_DEF(
-			y =  a * two * b;
+		y[0].zero();
+		h_y[0].zero();
 
-			stream.set_blas_pointer_mode_device();
-			blas::gemm(stream, false, false,  sz, sz, sz,
-					two, h_a.data(), sz,
-					h_b.data(), sz,
-					zero, h_y.data(), sz);
+		y[0] =   a * two * b[0];
 
-				return BC::all(h_y.approx_equal(y));
-		)
-		BC_TEST_DEF(
-			y[0].zero();
-			h_y[0].zero();
+		stream.set_blas_pointer_mode_device();
+		blas::gemv(stream, false,  sz, sz,
+				two.data(), h_a.data(), sz,
+				h_b.data(), 1,
+				zero.data(), h_y.data(), 1);
 
-			y[0] =   a * two * b[0];
+			return BC::tensors::all(h_y[0].approx_equal(y[0]));
+	)
 
-			stream.set_blas_pointer_mode_device();
-			blas::gemv(stream, false,  sz, sz,
-					two, h_a.data(), sz,
-					h_b.data(), 1,
-					zero, h_y.data(), 1);
+	BC_TEST_DEF(
+		y.zero();
+		h_y.zero();
+		y =  a[0]* two * b[0].t();
 
-				return BC::all(h_y[0].approx_equal(y[0]));
-		)
-		BC_TEST_DEF(
-			y.zero();
-			h_y.zero();
-			y =  a[0]* two * b[0].t();
+		stream.set_blas_pointer_mode_device();
+		blas::ger(stream,  sz, sz,
+				two.data(), h_a[0].data(), 1,
+				h_b[0].data(), 1,
+				h_y.data(), sz);
 
-			stream.set_blas_pointer_mode_device();
-			blas::ger(stream,  sz, sz,
-					two, h_a[0], 1,
-					h_b[0], 1,
-					h_y.data(), sz);
+			return BC::tensors::all(h_y.approx_equal(y));
+	)
 
-				return BC::all(h_y.approx_equal(y));
-		)
+	BC_TEST_DEF(
+			//test dot
+		y[0][0] = a[0] * b[0];
 
-		BC_TEST_DEF(
-				//test dot
-			y[0][0] = a[0] * b[0];
-
-			return BC::all(y[0][0].approx_equal(BC::sum(a[0] % b[0])));
-		)
-
-
+		return BC::tensors::all(y[0][0].approx_equal(value_sum(a[0] % b[0])));
+	)
 
 	//--------------------------------------------------------------
 		stream.get_allocator().reserve(sz*sz*2 * sizeof(value_type));
-
 
 	BC_TEST_DEF(
 		y = a * b + a * b;
 
 		stream.set_blas_pointer_mode_device();
 		blas::gemm(stream, false, false,  sz, sz, sz,
-				two, h_a.data(), sz,
+				two.data(), h_a.data(), sz,
 				h_b.data(), sz,
-				zero, h_y.data(), sz);
+				zero.data(), h_y.data(), sz);
 
-		return BC::all(h_y.approx_equal(y));
+		return BC::tensors::all(h_y.approx_equal(y));
 	)
 
 	BC_TEST_DEF(
@@ -235,17 +243,18 @@ int test_blas(int sz=128) {
 
 		stream.set_blas_pointer_mode_device();
 		blas::gemm(stream, false, false,  sz, sz, sz,
-				two, h_a.data(), sz,
+				two.data(), h_a.data(), sz,
 				h_b.data(), sz,
-				one, h_y.data(), sz);
+				one.data(), h_y.data(), sz);
 
-		return BC::all(h_y.approx_equal(y));
+		return BC::tensors::all(h_y.approx_equal(y));
 	)
+
 	BC_TEST_DEF(
 		y = 1;
 		h_y = 1;
 		y -= a * b - a * b;
-		return BC::all(h_y.approx_equal(y));
+		return BC::tensors::all(h_y.approx_equal(y));
 	)
 
 	BC_TEST_DEF(
@@ -255,18 +264,18 @@ int test_blas(int sz=128) {
 
 		stream.set_blas_pointer_mode_device();
 		blas::gemm(stream, false, false,  sz, sz, sz,
-				two, h_a.data(), sz,
+				two.data(), h_a.data(), sz,
 				h_b.data(), sz,
-				one, h_y.data(), sz);
+				one.data(), h_y.data(), sz);
 
-			return BC::all(h_y.approx_equal(y));
+			return BC::tensors::all(h_y.approx_equal(y));
 	)
 
 	BC_TEST_DEF(
 		y = 1;
 		h_y = 2;
 		y -= a * b - a * b - 1;
-		return BC::all(h_y.approx_equal(y));
+		return BC::tensors::all(h_y.approx_equal(y));
 	)
 
 	BC_TEST_DEF(
@@ -274,7 +283,7 @@ int test_blas(int sz=128) {
 		h_y = 2;
 		y += (a * b) / (a * b);
 
-		return BC::all(y.approx_equal(h_y));
+		return BC::tensors::all(y.approx_equal(h_y));
 	)
 
 	BC_TEST_DEF(
@@ -282,26 +291,23 @@ int test_blas(int sz=128) {
 		h_y = 0;
 		y -= (a * b) / (a * b);
 
-		return BC::all(y.approx_equal(h_y));
+		return BC::tensors::all(y.approx_equal(h_y));
 	)
 
-
-	//----------------------------------------------------------
 	//------------------------ Same blas tests as above but with scalar allocated on the stack ----------//
-
-
 	//scalar left test -------------------
 	BC_TEST_DEF(
 		y = 2 * a * b;
 
 		stream.set_blas_pointer_mode_device();
 		blas::gemm(stream, false, false,  sz, sz, sz,
-				two, h_a.data(), sz,
+				two.data(), h_a.data(), sz,
 				h_b.data(), sz,
-				zero, h_y.data(), sz);
+				zero.data(), h_y.data(), sz);
 
-			return BC::all(h_y.approx_equal(y));
+			return BC::tensors::all(h_y.approx_equal(y));
 	)
+
 	BC_TEST_DEF(
 		y[0].zero();
 		h_y[0].zero();
@@ -310,12 +316,13 @@ int test_blas(int sz=128) {
 
 		stream.set_blas_pointer_mode_device();
 		blas::gemv(stream, false,  sz, sz,
-				two, h_a.data(), sz,
+				two.data(), h_a.data(), sz,
 				h_b.data(), 1,
-				zero, h_y.data(), 1);
+				zero.data(), h_y.data(), 1);
 
-			return BC::all(h_y[0].approx_equal(y[0]));
+			return BC::tensors::all(h_y[0].approx_equal(y[0]));
 	)
+
 	BC_TEST_DEF(
 		y.zero();
 		h_y.zero();
@@ -323,61 +330,61 @@ int test_blas(int sz=128) {
 
 		stream.set_blas_pointer_mode_device();
 		blas::ger(stream,  sz, sz,
-				two, h_a[0], 1,
-				h_b[0], 1,
+				two.data(), h_a[0].data(), 1,
+				h_b[0].data(), 1,
 				h_y.data(), sz);
 
-			return BC::all(h_y.approx_equal(y));
+			return BC::tensors::all(h_y.approx_equal(y));
 	)
 
 	BC_TEST_DEF(
 			//test dot
 		y[0][0] = a[0] * b[0];
 
-		return BC::all(y[0][0].approx_equal(BC::sum(a[0] % b[0])));
+		return BC::tensors::all(y[0][0].approx_equal(value_sum(a[0] % b[0])));
 	)
 
-
 	// scalar right test -------------------------------------------
+	BC_TEST_DEF(
+		y =  a * 2 * b;
+
+		stream.set_blas_pointer_mode_device();
+		blas::gemm(stream, false, false,  sz, sz, sz,
+				two.data(), h_a.data(), sz,
+				h_b.data(), sz,
+				zero.data(), h_y.data(), sz);
+
+			return BC::tensors::all(h_y.approx_equal(y));
+	)
 
 	BC_TEST_DEF(
-			y =  a * 2 * b;
+		y[0].zero();
+		h_y[0].zero();
 
-			stream.set_blas_pointer_mode_device();
-			blas::gemm(stream, false, false,  sz, sz, sz,
-					two, h_a.data(), sz,
-					h_b.data(), sz,
-					zero, h_y.data(), sz);
+		y[0] =   a * 2 * b[0];
 
-				return BC::all(h_y.approx_equal(y));
-		)
-		BC_TEST_DEF(
-			y[0].zero();
-			h_y[0].zero();
+		stream.set_blas_pointer_mode_device();
+		blas::gemv(stream, false,  sz, sz,
+				two.data(), h_a.data(), sz,
+				h_b.data(), 1,
+				zero.data(), h_y.data(), 1);
 
-			y[0] =   a * 2 * b[0];
+			return BC::tensors::all(h_y[0].approx_equal(y[0]));
+	)
 
-			stream.set_blas_pointer_mode_device();
-			blas::gemv(stream, false,  sz, sz,
-					two, h_a.data(), sz,
-					h_b.data(), 1,
-					zero, h_y.data(), 1);
+	BC_TEST_DEF(
+		y.zero();
+		h_y.zero();
+		y =  a[0]* 2 * b[0].t();
 
-				return BC::all(h_y[0].approx_equal(y[0]));
-		)
-		BC_TEST_DEF(
-			y.zero();
-			h_y.zero();
-			y =  a[0]* 2 * b[0].t();
+		stream.set_blas_pointer_mode_device();
+		blas::ger(stream,  sz, sz,
+				two.data(), h_a[0].data(), 1,
+				h_b[0].data(), 1,
+				h_y.data(), sz);
 
-			stream.set_blas_pointer_mode_device();
-			blas::ger(stream,  sz, sz,
-					two, h_a[0], 1,
-					h_b[0], 1,
-					h_y.data(), sz);
-
-				return BC::all(h_y.approx_equal(y));
-		)
+			return BC::tensors::all(h_y.approx_equal(y));
+	)
 
 	BC_TEST_BODY_TAIL
 }
@@ -385,4 +392,4 @@ int test_blas(int sz=128) {
 }
 
 
-#endif /* TEST_BLAS_VALIDITY_H_ */
+#endif /* TEST_BLAS_VALIDITY_H_ */ 

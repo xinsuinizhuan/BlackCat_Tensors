@@ -1,0 +1,24 @@
+languages: cpp
+matrix:
+  include:
+    # works on Precise and Trusty
+    - os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+            - gcc-7
+            - libblas-dev
+      env:
+         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-8"
+
+before_install:
+    - eval "${MATRIX_EVAL}"
+    - export CC=/usr/bin/gcc-7
+    
+before_script: cd tests
+
+script: cd tests; make travis; ./blackcat_tests;  cd ../examples/mnist_test/; make travis; ./mnist_test_exec mnist_train.csv; cd ../mnist_test_recurrent; make travis; ./mnist_test_exec mnist_train.csv 

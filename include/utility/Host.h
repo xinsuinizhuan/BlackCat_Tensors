@@ -11,7 +11,8 @@
 namespace BC {
 namespace utility {
 
-struct Host {
+template<>
+struct Utility<host_tag> {
 
 	template<class T, class U, class V>
 	static void copy(T* to, U* from, V size) {
@@ -22,18 +23,20 @@ struct Host {
 		BC_omp_bar__
 	}
 
-    template<class T, class U>
-    static void HostToDevice(T* device_ptr, U* host_ptr, BC::size_t  size=1) {
-        copy(device_ptr, host_ptr, size);
-    }
-    template<class T, class U>
-    static void DeviceToHost(T* host_ptr, U* device_ptr, BC::size_t  size=1) {
-        copy(host_ptr, device_ptr, size);
-    }
-    template<class T>
-    static T extract(T* data_ptr, BC::size_t index=0) {
-    	return data_ptr[index];
-    }
+	template<class T, class U>
+	static void HostToDevice(T* device_ptr, U* host_ptr, BC::size_t  size=1) {
+		copy(device_ptr, host_ptr, size);
+	}
+
+	template<class T, class U>
+	static void DeviceToHost(T* host_ptr, U* device_ptr, BC::size_t  size=1) {
+		copy(host_ptr, device_ptr, size);
+	}
+
+	template<class T>
+	static T extract(T* data_ptr, BC::size_t index=0) {
+		return data_ptr[index];
+	}
 };
 
 }

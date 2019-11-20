@@ -18,38 +18,39 @@ int test_algorithms(int sz=128) {
 
 	BC_TEST_BODY_HEAD
 
-	using alloc_t = allocator<value_type>;
-//	using vec = BC::Vector<value_type, alloc_t>;
-	using mat = BC::Matrix<value_type, alloc_t>;
-//	using scalar = BC::Scalar<value_type, alloc_t>;
+	using allocator_type = allocator<value_type>;
+	using system_tag = typename BC::allocator_traits<allocator_type>::system_tag;
+	using mat = BC::Matrix<value_type, allocator_type>;
+
+	BC::streams::Stream<system_tag> stream;
 
 	BC_TEST_DEF(
 		mat a(sz, sz);
 		a.fill(2);
 
-		return BC::all(a == 2);
+		return BC::tensors::all(a == 2);
 	)
 	BC_TEST_DEF(
 		mat a(sz, sz);
-		BC::fill(a.begin(), a.end(), 3);
+		BC::algorithms::fill(a.get_stream(), a.cw_begin(), a.cw_end(), 3);
 
-		return BC::all(a == 3);
+		return BC::tensors::all(a == 3);
 	)
 
 	BC_TEST_DEF(
 		mat a(sz, sz);
 		mat b(sz, sz);
 
-		a.create();
-		b.create();
+		a.get_stream().create();
+		b.get_stream().create();
 
-		BC::fill(a.get_stream(), a.begin(), a.end(), 5);
-		BC::fill(b.get_stream(), b.begin(), b.end(), 7);
+		BC::algorithms::fill(a.get_stream(), a.cw_begin(), a.cw_end(), 5);
+		BC::algorithms::fill(b.get_stream(), b.cw_begin(), b.cw_end(), 7);
 
-		a.sync();
-		b.sync();
+		a.get_stream().sync();
+		b.get_stream().sync();
 
-		return BC::all(a == 5) && BC::all(b == 7);
+		return BC::tensors::all(a == 5) && BC::tensors::all(b == 7);
 	)
 
 
@@ -59,16 +60,16 @@ int test_algorithms(int sz=128) {
 		mat a(sz, sz);
 		mat b(sz, sz);
 
-		a.create();
+		a.get_stream().create();
 
-		BC::fill(a.get_stream(), a.begin(), a.end(), 5);
-		BC::fill(b.get_stream(), b.begin(), b.end(), 7);
+		BC::algorithms::fill(a.get_stream(), a.cw_begin(), a.cw_end(), 5);
+		BC::algorithms::fill(b.get_stream(), b.cw_begin(), b.cw_end(), 7);
 
-		a.sync();
-		b.sync();
+		a.get_stream().sync();
+		b.get_stream().sync();
 
 
-		return BC::all(a == 5) && BC::all(b == 7);
+		return BC::tensors::all(a == 5) && BC::tensors::all(b == 7);
 	)
 
 	BC_TEST_BODY_TAIL

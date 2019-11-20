@@ -33,42 +33,77 @@ int test_operations(int sz=128) {
 	BC_TEST_DEF(
 		mat c(a);
 		validation = (c + b).approx_equal(a += b);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
+
 	BC_TEST_DEF(
 		mat c(a);
 		validation = (c - b).approx_equal(a -= b);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
+
 	BC_TEST_DEF(
 		mat c(a);
 		validation = (c / b).approx_equal(a /= b);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
+
 	BC_TEST_DEF(
 		mat c(a);
 		validation = (c % b).approx_equal(a %= b);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
+
 	BC_TEST_DEF(
 		mat c(a);
 		validation = (c + 1) >= a;
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
+
 	BC_TEST_DEF(
 		mat c(a);
 		validation = (c - 1) <= a;
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
+
 	BC_TEST_DEF(
 		mat c(a);
 		validation = c == a;
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
+
 	BC_TEST_DEF(
 		mat c(a);
 		validation = c*-1 == -a;
-		return BC::all(validation);
+		return BC::tensors::all(validation);
+	)
+
+	BC_TEST_DEF(
+		mat c(a);
+		c += 2;
+		validation = c == a + 2;
+		return BC::tensors::all(validation);
+	)
+
+	BC_TEST_DEF(
+		mat c(a);
+		c -= 2;
+		validation = c == a - 2;
+		return BC::tensors::all(validation);
+	)
+
+	BC_TEST_DEF(
+		mat c(a);
+		c /= 2;
+		validation = c == a / 2;
+		return BC::tensors::all(validation);
+	)
+
+	BC_TEST_DEF(
+		mat c(a);
+		c %= 2; //%= element-wise multiplication
+		validation = c == a * 2; //scalar multiplication
+		return BC::tensors::all(validation);
 	)
 
 	BC_TEST_BODY_TAIL
@@ -77,6 +112,7 @@ int test_operations(int sz=128) {
 template<class value_type, template<class> class allocator=BC::Basic_Allocator>
 int test_matrix_muls(int sz=128) {
 
+	sz =16;
 	BC_TEST_BODY_HEAD
 
 	using alloc_t = allocator<value_type>;
@@ -99,6 +135,8 @@ int test_matrix_muls(int sz=128) {
 	b.randomize(0, 12);
 
 
+	validation.get_stream().get_allocator().force_deallocate();
+
 	//lv trans
 	BC_TEST_DEF(
 		mat atrans = a.t();
@@ -106,7 +144,7 @@ int test_matrix_muls(int sz=128) {
 		d = a * b;
 
 		validation =  c.approx_equal(d);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
 
 	BC_TEST_DEF(
@@ -114,7 +152,7 @@ int test_matrix_muls(int sz=128) {
 		c = atrans.t() * b;
 		d = a * b;
 		validation =  c.approx_equal(d);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
 
 	//rv trans
@@ -123,40 +161,62 @@ int test_matrix_muls(int sz=128) {
 		c=(b * a);
 		d=(b * atrans.t());
 		validation = c.approx_equal(d);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
 
+
+
+//	BC_TEST_DEF(
+//		scal two(2.f);
+//
+//		c = a * b * two;
+//		d = two * a * b;
+//
+//		validation = c.approx_equal(d);
+//		return BC::tensors::all(validation);
+//	)
+
+
 	BC_TEST_DEF(
+		a.print();
+		b.print();
+
 		c = a * b * 2;
 		d = 2 * a * b;
 
 		validation = c.approx_equal(d);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
 
 
 	BC_TEST_DEF(
+		c.zero();
+		d.zero();
+
 		c = a.t() * b * 2;
 		d = 2 * a.t() * b;
 
 		validation = c.approx_equal(d);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
+
 	BC_TEST_DEF(
 		mat atrans(a.t());
+
 		c = atrans * b * 2;
 		d = 2 * a.t() * b;
 
 		validation = c.approx_equal(d);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
+
 	BC_TEST_DEF(
 		mat atrans(a.t());
 		c = atrans * b * 2;
 		d = 2 * atrans * b;
 
 		validation = c.approx_equal(d);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
 	BC_TEST_DEF(
 		mat atrans(a.t());
@@ -164,7 +224,7 @@ int test_matrix_muls(int sz=128) {
 		d = 3 + 2 * atrans * b + 5;
 
 		validation = c.approx_equal(d);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
 
 	BC_TEST_DEF(
@@ -182,7 +242,7 @@ int test_matrix_muls(int sz=128) {
 		f += f;
 
 		validation = (c.approx_equal(d) && c.approx_equal(e) && c.approx_equal(f));
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
 	BC_TEST_DEF(
 		mat atrans(a.t());
@@ -206,8 +266,35 @@ int test_matrix_muls(int sz=128) {
 
 
 		validation = c.approx_equal(d) && e.approx_equal(f) && g.approx_equal(h);
-		return BC::all(validation);
+		return BC::tensors::all(validation);
 	)
+	validation.get_stream().get_allocator().force_deallocate();
+
+
+	BC_TEST_DEF(
+		mat y(4,4);
+		mat dy(4,4);
+		mat w(4,4);
+		mat x(4,4);
+		mat z(4,4);
+
+		z += w.t() * BC::logistic.dx(w.t() * (y-dy));
+
+		return z.get_stream().get_allocator().allocated_bytes() == 0;
+	)
+
+	BC_TEST_DEF(
+		mat y(4,4);
+		mat dy(4,4);
+		mat w(4,4);
+		mat x(4,4);
+		mat z(4,4);
+
+		z -= w.t() * BC::logistic.dx(w.t() * (y-dy));
+
+		return z.get_stream().get_allocator().allocated_bytes() == 0;
+	)
+
 	BC_TEST_BODY_TAIL
 }
 

@@ -9,10 +9,12 @@
 #define BC_UTILITY_UTILITY_H_
 
 #include <sstream>
+
+BC_DEFAULT_MODULE_BODY(utility, Utility)
+
 #include "Host.h"
 #include "Device.h"
-
-BC_DEFAULT_MODULE_BODY(utility)
+#include "Any_Collections.h"
 
 
 #endif /* UTILITY_H_ */
